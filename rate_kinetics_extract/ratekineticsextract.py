@@ -14,6 +14,7 @@ class KineticAnalysis:
     def __init__(self, time, response):
         self.time = time
         self.response = response
+        
     
     def curve_fit(self, function, p0):
         """
@@ -169,3 +170,69 @@ class KineticAnalysis:
             The function that can be used to calculate the response
         """
         return y_initial * np.exp(-koff * t)
+    
+
+    def get_function(self):
+        """Select the appropriate function based on the assumption."""
+        if self.assumption == "baseline+steadystate":
+            return lambda t, y_initial, y_final, kon: y_final * (1 - np.exp(-kon * t)) + y_initial
+
+        elif self.assumption == "response to zero":
+            return lambda t, C, y_initial, kon, koff: (C / (kon - koff)) * (np.exp(-koff * t) - np.exp(-kon * t)) + y_initial
+
+        elif self.assumption == "response to steady state":
+            return lambda t, y_initial, y_final, D, kon, koff: y_final * ((1 - D * np.exp(-kon * t)) + (D - 1) * np.exp(-koff * t)) + y_initial
+
+        elif self.assumption == "typical_association":
+            return lambda t, y_final, conc, kon, koff: ((y_final * conc) / (koff / kon + conc)) * (1 - np.exp((-1 * (kon * conc + koff)) * t))
+
+        elif self.assumption == "typical_dissociation":
+            return lambda t, y_initial, koff: y_initial * np.exp(-koff * t)
+
+        else:
+            raise ValueError("Invalid assumption provided")
+
+    def fit_data(self, p0):
+        """
+        Fit the data using the selected function.
+
+        Parameters
+        ----------
+        p0 : list
+            Initial guess for the parameters.
+
+        Returns
+        -------
+        tuple
+            The optimized parameters and covariance.
+        """
+        time = self.data.iloc[:, 0]
+        response = self.data.iloc[:, 1]
+
+        param_k, pcov_k = curve_fit(self.function, time, response, p0=p0)
+        self.plot_fitted_curve(param_k)
+        return param_k, pcov_k
+
+    def plot_fitted_curve(self, param_k):
+        """
+        Plot the fitted curve along with the experimental data.
+
+        Parameters
+        ----------
+        param_k : list
+            The fitted parameters.
+        """
+        time = self.data.iloc[:, 0]
+        response = self.data.iloc[:, 1]
+
+        plt.plot(time, response, 'o', label='Experimental Data')
+        fitted_response = self.function(time, *param_k)
+        plt.plot(time, fitted_response, '-', label='Fitted Curve')
+        plt.xlabel('Time (t)')
+        plt.ylabel('Response')
+        plt.title('Data and Fitted Curve')
+        plt.legend()
+        plt.show()
+
+        print("Fitted parameters: ", param_k)
+

@@ -15,7 +15,7 @@ print(root_dir)
 # Add the root directory to the Python path
 sys.path.append(root_dir)
 
-from rate_kinetics_extract.ratekineticsextract import KineticAnalysis
+from rate_kinetics_extract.RateKineticsExtract import KineticAnalysis
 import numpy as np
 import pandas as pd
 class TestRateKinetics(unittest.TestCase):

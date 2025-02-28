@@ -13,7 +13,7 @@ print(root_dir)
 # Add the root directory to the Python path
 sys.path.append(root_dir)
 
-from rate_kinetics_extract.ratekineticsextract import KineticAnalysis
+from rate_kinetics_extract.ratekineticstest import KineticAnalysis
 import numpy as np
 import pandas as pd
 
@@ -29,8 +29,12 @@ class TestRateKinetics(unittest.TestCase):
         expected_params = np.array([0, 5, 1])  
     
         data = pd.DataFrame({'time': time, 'RU 1nM': response})
-    
-        params, _ = fit_data(time, response, p0, data)
+        kinetics = KineticAnalysis(time, response)
+        
+        def fit_function(t, y_initial, y_final, kon):
+            return y_final * (1 - np.exp(-kon * t)) + y_initial
+        
+        params, _ = kinetics.curve_fit(fit_function, p0)
     
         np.testing.assert_allclose(params, expected_params, atol=6e-1)
 
