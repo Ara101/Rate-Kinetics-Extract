@@ -13,10 +13,7 @@ print(root_dir)
 # Add the root directory to the Python path
 sys.path.append(root_dir)
 
-# Now you can import your module
-#from pcr_optimizer.pcrprotocoloptimizer import pcr
-
-from rate_kinetics_extract.RateKineticsExtract import KineticAnalysis
+from rate_kinetics_extract.ratekineticsextract import KineticAnalysis
 import numpy as np
 import pandas as pd
 
