@@ -32,7 +32,8 @@ class TestRateKinetics(unittest.TestCase):
         kinetics = KineticAnalysis(time, response)
         
         def fit_function(t, y_initial, y_final, kon):
-            return y_final * (1 - np.exp(-kon * t)) + y_initial
+            function = kinetics.baseline_steadystate_response
+            return function(t, y_initial, y_final, kon)
         
         params, _ = kinetics.curve_fit(fit_function, p0)
     
@@ -50,8 +51,13 @@ class TestRateKinetics(unittest.TestCase):
         expected_params = np.array([1, 1, 0.1, 0.09])  
         
         data = pd.DataFrame({'time': time, 'RU 1nM': response})
+        kinetics = KineticAnalysis(time, response)
         
-        params, _ = fit_data(time, response, p0, assumption, data)
+        def fit_function(t, C, y_initial, kon, koff):
+            function = kinetics.response_to_zero
+            return function(t, C, y_initial, kon, koff)
+        
+        params, _ = kinetics.curve_fit(fit_function, p0)
         
         np.testing.assert_allclose(params, expected_params, atol=5e-1)
         
