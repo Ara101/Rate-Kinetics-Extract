@@ -236,3 +236,6 @@ class KineticAnalysis:
 
         print("Fitted parameters: ", param_k)
 
+
+        
+
